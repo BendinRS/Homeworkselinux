@@ -1,5 +1,7 @@
 # Домашняя работа "Стенд с Vagrant c SELinux"
 
+<details>
+  <summary>Запустить nginx на нестандартном порту 3-мя разными способами </summary>
 ### Цель: Диагностировать проблемы и модифицировать политики SELinux для корректной работы приложений
 
 1. Запустить nginx на нестандартном порту 3-мя разными способами:
@@ -139,12 +141,5 @@ semodule -i nginx.pp
 
 __У-успех__
 ![Альтернативный текст](https://i.ibb.co/gJb448h/nginx3.png)
-
-
-
-
-<details>
-  <summary>Q1: What is the best Language iываыва </summary>
-   ываываываыва
 </details>
 
