@@ -8,4 +8,4 @@
     + формирование и установка модуля SELinux.
 
 + Создаем вм [vagrantfile](vagrantfile) 
-![Альтернативный текст](https://i.ibb.co/XtLxH4H/selinux-fail1.png)
+![Альтернативный текст](https://i.ibb.co/2dh3J6J/selinux-fail1.png)
