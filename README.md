@@ -144,3 +144,81 @@ __У-успех__
 ![Альтернативный текст](https://i.ibb.co/gJb448h/nginx3.png)
 </details>
 
+<details>
+  <summary> Обеспечение работоспособности приложения при включенном SELinux </summary>
+   
+ + Развернем предложенный стенд https://github.com/mbfx/otus-linux-adm/tree/master/selinux_dns_problems
+![Альтернативный текст](https://i.ibb.co/Mfn5CkV/sel2.png)
+
++ Подключаемся к клиенту и пробуем внести изменения
+
+```out20
+[root@client ~]# nsupdate -k /etc/named.zonetransfer.key
+> server 192.168.50.10
+> zone ddns.lab
+> update add www.ddns.lab. 60 A 192.168.50.15
+> send
+update failed: SERVFAIL
+> quit
+```
+
++ Переходим в логи
+
+на клиенте отсутствуют ошибки.
+
++ Не закрывая сессию на клиенте, подключимся к серверу ns01 и проверим логи selinux
+
+```out21
+[root@ns01 ~]# cat /var/log/audit/audit.log | audit2why
+type=AVC msg=audit(1653510348.341:1863): avc:  denied  { create } for  pid=5009 comm="isc-worker0000" name="named.ddns.lab.view1.jnl" scontext=system_u:system_r:named_t:s0 tcontext=system_u:object_r:etc_t:s0 tclass=file permissive=0
+
+	Was caused by:
+		Missing type enforcement (TE) allow rule.
+
+		You can use audit2allow to generate a loadable module to allow this access.
+
+[root@ns01 ~]# 
+```
+Ошибка в контексте безопасности. Вместо типа named_t используется тип etc_t.
+
++ Проверяем каталог /etc/named
+
+```out22
+[root@ns01 ~]# ls -laZ /etc/named
+drw-rwx---. root named system_u:object_r:etc_t:s0       .
+drwxr-xr-x. root root  system_u:object_r:etc_t:s0       ..
+drw-rwx---. root named unconfined_u:object_r:etc_t:s0   dynamic
+-rw-rw----. root named system_u:object_r:etc_t:s0       named.50.168.192.rev
+-rw-rw----. root named system_u:object_r:etc_t:s0       named.dns.lab
+-rw-rw----. root named system_u:object_r:etc_t:s0       named.dns.lab.view1
+-rw-rw----. root named system_u:object_r:etc_t:s0       named.newdns.lab
+```
+
+контекст безопасности неправильный. Проблема заключается в том, что конфигурационные файлы лежат в другом каталоге.
+Посмотреть в каком каталоги должны лежать, файлы, чтобы на них распространялись правильные политики SELinux можно с помощью команды: 
+```out 23
+sudo semanage fcontext -l | grep named ```
+```
+
++ Изменяем тип контекста безопасности
+
+```out24
+[root@ns01 ~]# sudo chcon -R -t named_zone_t /etc/named
+[root@ns01 ~]#  ls -laZ /etc/named
+drw-rwx---. root named system_u:object_r:named_zone_t:s0 .
+drwxr-xr-x. root root  system_u:object_r:etc_t:s0       ..
+drw-rwx---. root named unconfined_u:object_r:named_zone_t:s0 dynamic
+-rw-rw----. root named system_u:object_r:named_zone_t:s0 named.50.168.192.rev
+-rw-rw----. root named system_u:object_r:named_zone_t:s0 named.dns.lab
+-rw-rw----. root named system_u:object_r:named_zone_t:s0 named.dns.lab.view1
+-rw-rw----. root named system_u:object_r:named_zone_t:s0 named.newdns.lab
+```
+
++ Вносим изменения с клиента и проверяем
+![Альтернативный текст](https://i.ibb.co/fvxg7Ww/screen.png)
+
+
+
+
+
+</details>
