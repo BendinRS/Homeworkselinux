@@ -8,3 +8,4 @@
     + формирование и установка модуля SELinux.
 
 + Создаем вм [vagrantfile](vagrantfile) 
+![skrin](https://ibb.co/XtLxH4H)
