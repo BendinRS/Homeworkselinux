@@ -144,6 +144,7 @@ __У-успех__
 
 
 <details>
-  <summary>Q1: What is the best Language in the World? </summary>
-   A1: JavaScript
+  <summary>Q1: What is the best Language iываыва </summary>
+   ываываываыва
 </details>
+
